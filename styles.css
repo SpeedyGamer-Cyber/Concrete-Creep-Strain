@@ -1,0 +1,194 @@
+:root{
+  --bg:#fff;
+  --panel:#f8fafc;
+  --border:#e2e8f0;
+  --fg:#0f172a;
+  --muted:#475569;
+  --accent:#2563eb;
+  --accent-weak:#dbeafe;
+  --danger:#b91c1c;
+  --grid:rgba(15,23,42,0.06);
+  --shadow:0 6px 24px rgba(15,23,42,.07);
+
+  /* Fixed header height */
+  --header-height:72px;
+}
+[data-theme="dark"]{
+  --bg:#0b1220;
+  --panel:#0f172a;
+  --border:#1f2937;
+  --fg:#e5e7eb;
+  --muted:#93a0b4;
+  --accent:#60a5fa;
+  --accent-weak:#0b3b82;
+  --danger:#f87171;
+  --grid:rgba(148,163,184,.16);
+  --shadow:0 6px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  min-height:100%;
+  font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+  font-size:14px;
+  color:var(--fg);
+  background:radial-gradient(1200px 500px at 10% -10%,#eef2ff 0,var(--bg) 60%);
+}
+
+/* Container spacing updated for fixed header */
+.container{
+  max-width:1080px;
+  margin:0 auto;
+  padding: calc(var(--header-height) + 24px) 20px 24px;
+}
+
+/* Fixed header */
+.header{
+  position:fixed;
+  top:0; left:0; right:0;
+  height:var(--header-height);
+  z-index:1000;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow);
+
+  /* Align header content with container width while remaining full-bleed */
+  padding-inline: max(20px, calc((100vw - 1080px) / 2));
+}
+.heading-wrap{display:flex;flex-direction:column}
+
+/* Title row with LR logo image on the left */
+.title-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+/* LR.png presentation */
+.brand-logo{
+  width:54px;
+  height:54px;
+  display:block;
+  object-fit:contain;       /* preserves aspect without cropping */
+}
+
+/* Optional smaller logo when header is fixed */
+.header .brand-logo{
+  height:54px;
+  width:auto;
+}
+
+/* If your LR.png is very dark, consider adding a subtle background in dark mode */
+/*
+[data-theme="dark"] .brand-logo{
+  background:rgba(255,255,255,0.06);
+  padding:2px;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+*/
+
+h1{margin:0;font-size:28px}
+.subtitle{margin:4px 0 0;color:var(--muted)}
+.header-actions{display:flex;align-items:center;gap:12px}
+
+.theme-toggle{position:relative;width:56px;height:30px}
+.theme-toggle input{display:none}
+.theme-toggle label{
+  position:absolute;inset:0;cursor:pointer;border-radius:999px;
+  background:var(--panel);border:1px solid var(--border);box-shadow:var(--shadow)
+}
+.theme-toggle label:after{
+  content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;border-radius:50%;transition:transform .2s ease
+}
+[data-theme="dark"] .theme-toggle label:after{background:#111827}
+.theme-toggle .sun,.theme-toggle .moon{position:absolute;top:50%;transform:translateY(-50%);font-size:14px;opacity:.7}
+.theme-toggle .sun{left:8px}
+.theme-toggle .moon{right:8px}
+.theme-toggle input:checked+label:after{transform:translateX(26px)}
+
+.card{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;
+  padding:18px;margin-bottom:18px;box-shadow:var(--shadow)
+}
+.card-title{margin:0 0 12px;font-size:18px}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(260px,1fr));gap:14px 18px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{color:var(--muted);font-weight:600}
+.field input[type=number]{
+  appearance:textfield;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;color:#0f172a;font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s
+}
+[data-theme="dark"] .field input[type=number]{background:#0b1220;color:var(--fg);border-color:#334155}
+.field input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.15)}
+
+.radio-group{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.radio-group input{margin-right:6px}
+
+.help{margin-top:10px;color:var(--muted);font-size:12px}
+.warnings{margin-top:10px;color:var(--danger);font-weight:600}
+
+.actions{margin-top:14px;display:flex;align-items:center;gap:10px}
+.btn{
+  appearance:none;border:1px solid var(--border);background:#fff;color:#0f172a;
+  padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;
+  transition:transform .05s ease,box-shadow .15s ease
+}
+[data-theme="dark"] .btn{background:#0b1220;color:var(--fg);border-color:#334155}
+.btn:hover{box-shadow:0 4px 18px rgba(15,23,42,.12)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+[data-theme="dark"] .btn.primary{color:#0b1220}
+.btn.ghost{background:transparent}
+
+.toggle{display:inline-flex;gap:8px;align-items:center;color:var(--muted)}
+
+.results{display:grid;gap:12px;grid-template-columns:repeat(5,minmax(140px,1fr))}
+@media (max-width:980px){.results{grid-template-columns:repeat(2,1fr)}}
+.result{
+  background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 12px
+}
+[data-theme="dark"] .result{background:#0b1220;border-color:#334155}
+.result .label{color:var(--muted);margin-bottom:4px}
+.result .value{font-size:16px;font-weight:700}
+
+.canvas-wrap{
+  background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px;height:360px
+}
+[data-theme="dark"] .canvas-wrap{background:#0b1220;border-color:#334155}
+@media (max-width:760px){.canvas-wrap{height:260px}}
+
+.footer{color:var(--muted);text-align:left;padding:10px 0 0}
+
+.calc-actions{display:flex;justify-content:flex-end;margin-bottom:8px}
+
+/* Detailed Calculations: remove internal scrollbar and wrap lines */
+.calc-block{
+  background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;
+  max-height:none;                  /* was: 360px */
+  overflow:visible;                 /* was: auto */
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  font-size:12px;line-height:1.4;
+  white-space:pre-wrap;             /* keep, allows wrapping of long lines */
+  word-break:break-word;
+  overflow-wrap:anywhere;
+}
+[data-theme="dark"] .calc-block{background:#0b1220;border-color:#334155}
+
+.muted{color:var(--muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+.spacer{flex:1}
+
+/* In-page anchors won’t be hidden behind the fixed header */
+[id]{scroll-margin-top: calc(var(--header-height) + 12px)}
+
+/* Optional: avoid clipping in certain cards/wrappers */
+.canvas-wrap, .card { overflow: visible; }

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creep Coefficient Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <!-- Title + LR logo on the left -->
+      <div class="heading-wrap">
+        <div class="title-row">
+          <img class="brand-logo" src="LR.png" alt="LR logo" width="54" height="54" />
+          <div>
+            <h1>Creep Strain Calculator</h1>
+            <p class="subtitle">EN 1992-1-1 2004 §3.1.4 &amp; Annex B (Draft)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="theme-toggle" title="Toggle light/dark mode">
+          <input type="checkbox" id="themeSwitch" aria-label="Toggle theme">
+          <label for="themeSwitch"><span class="sun">☀️</span><span class="moon">🌙</span></label>
+        </div>
+      </div>
+    </header>
+
+    <!-- Inputs -->
+    <section class="card">
+      <h2 class="card-title">Inputs</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="fck">Concrete strength f<sub>ck</sub> (MPa)</label>
+          <input type="number" id="fck" placeholder="e.g., 40" min="10" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="RH">Relative humidity RH (%)</label>
+          <input type="number" id="RH" placeholder="e.g., 70" min="10" max="100" step="1" required>
+        </div>
+        <div class="field">
+          <label for="Ac">Concrete area A<sub>c</sub> (mm²)</label>
+          <input type="number" id="Ac" placeholder="e.g., 300000" min="1" step="1" required>
+        </div>
+        <div class="field">
+          <label for="u">Perimeter u (mm)</label>
+          <input type="number" id="u" placeholder="e.g., 2200" min="1" step="1" required>
+        </div>
+        <div class="field">
+          <label for="t0">Age at loading t<sub>0</sub> (days)</label>
+          <input type="number" id="t0" placeholder="e.g., 28" min="0" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="t">Age considered t (days)</label>
+          <input type="number" id="t" placeholder="e.g., 365" min="0" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="T">Ambient temperature T (°C)</label>
+          <input type="number" id="T" placeholder="e.g., 20" step="0.1" required>
+        </div>
+        <div class="field">
+          <label for="sigma_c">Compressive stress σ<sub>c</sub> (MPa)</label>
+          <input type="number" id="sigma_c" placeholder="e.g., 10" min="0" step="0.01" required>
+        </div>
+        <div class="field">
+          <label for="ts">Curing days t<sub>s</sub> (days) <span class="muted">(optional)</span></label>
+          <input type="number" id="ts" placeholder="e.g., 7" min="0" step="0.1">
+        </div>
+        <div class="field">
+          <label>Cement class</label>
+          <div class="radio-group">
+            <label><input type="radio" name="cementClass" value="S"> Class S</label>
+            <label><input type="radio" name="cementClass" value="N" checked> Class N</label>
+            <label><input type="radio" name="cementClass" value="R"> Class R</label>
+          </div>
+        </div>
+      </div>
+      <div class="help">h<sub>0</sub> = 2A<sub>c</sub>/u (mm). Model typical range RH = 40–100%. Ensure t ≥ t<sub>0</sub>.</div>
+      <div id="warn" class="warnings" role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button id="btnCalc" class="btn primary">Calculate &amp; Plot</button>
+        <button id="btnReset" class="btn ghost">Reset</button>
+        <div class="spacer"></div>
+        <label class="toggle">
+          <input type="checkbox" id="autoUpdate">
+          <span>Auto-update on input change</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="card">
+      <h2 class="card-title">Results</h2>
+      <div class="results">
+        <div class="result"><div class="label">h<sub>0</sub> (mm)</div><div class="value mono" id="res_h0">—</div></div>
+        <div class="result"><div class="label">φ<sub>0</sub> (Notional)</div><div class="value mono" id="res_phi0">—</div></div>
+        <div class="result"><div class="label">β<sub>ct,t0</sub> (Development)</div><div class="value mono" id="res_beta">—</div></div>
+        <div class="result"><div class="label">φ(t, t<sub>0</sub>)</div><div class="value mono" id="res_phi_tt0">—</div></div>
+        <div class="result"><div class="label">ε<sub>cci</sub>(t<sub>0</sub>) (dimensionless)</div><div class="value mono" id="res_epscci">—</div></div>
+      </div>
+    </section>
+
+    <!-- Detailed Calculations (moved here, right after Results) -->
+    <section class="card">
+      <h2 class="card-title">Detailed Calculations</h2>
+      <div class="calc-actions">
+        <button id="btnCopyCalc" class="btn ghost">Copy details</button>
+      </div>
+      <pre id="calc_details" class="calc-block" aria-live="polite">—</pre>
+    </section>
+
+    <!-- Chart (after calculations) -->
+    <section class="card">
+      <h2 class="card-title">Creep Coefficient vs Time</h2>
+      <div class="canvas-wrap"><canvas id="creepChart"></canvas></div>
+      <div class="help">Plot from t<sub>0</sub> to t. φ(t, t<sub>0</sub>) = φ<sub>0</sub> · β<sub>ct,t0</sub>.</div>
+    </section>
+
+    <footer class="footer">
+      <small>© OFFSHORE FIXED STRUCTURES 2025 — EC2 2004 Creep Tool</small>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
