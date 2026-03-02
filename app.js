@@ -66,11 +66,28 @@ function computeOnce(inputs){
     return { error: 'Area (A_c) and perimeter (u) must be > 0.' };
   }
 
+  // ---- Input limits (strict) ----
+  if (!(fck > 10 && fck < 100)) {
+    return { error: 'Concrete strength fck must satisfy 10 < fck < 100 MPa.' };
+  }
+  if (!(t0 > 1)) {
+    return { error: 'Age at loading t0 must be > 1 day.' };
+  }
+  if (!(t > t0)) {
+    return { error: 'Age considered t must be greater than t0.' };
+  }
+  if (!(T > 0 && T < 80)) {
+    return { error: 'Ambient temperature T must satisfy 0 < T < 80 °C.' };
+  }
+  if (!(sigma_c > 0)) {
+    return { error: 'Compressive stress σc must be > 0 MPa.' };
+  }
+
   const warnings = [];
   let RH = RH_in;
-  if (RH < 40 || RH > 100) {
-    warnings.push('RH is outside typical 40–100% range. Clamped to model limits.');
-    RH = clamp(RH, 40, 100);
+  if (RH < 20 || RH > 100) {
+    warnings.push('RH is outside typical 20–100% range. Clamped to model limits.');
+    RH = clamp(RH, 20, 100);
   }
 
   const { var3, var4 } = cementParams[cementClass] || cementParams.N;
@@ -122,7 +139,7 @@ function computeOnce(inputs){
   const phi0    = phi_RH * beta_fcm * beta_t0;   // notional creep
   const phi_tt0 = phi0 * beta_ct_t0;             // creep at time t
 
-  const k_sigma = sigma_c / Math.max(fck_t0, 1e-6);
+  const k_sigma = Math.max(0.45, sigma_c / Math.max(fck_t0, 1e-6));
   const eps_cci = phi_tt0 * Math.exp(1.5 * (k_sigma - 0.45)) * (sigma_c / Ec); // dimensionless
   if (k_sigma > 0.5) warnings.push('σc/fck,t0 is relatively high; nonlinear effects dominate.');
 
@@ -318,7 +335,7 @@ function renderCalcDetails(out, inputs){
   L.push('CREEP COEFFICIENTS & STRAIN');
   L.push(`  φ0 = φ_RH · β_fcm · β_t0 = ${fmtN(out.phi_RH,4)} × ${fmtN(out.beta_fcm,4)} × ${fmtN(out.beta_t0,4)} = ${fmtN(out.phi0,4)}`);
   L.push(`  φ(t,t0) = φ0 · β_ct,t0 = ${fmtN(out.phi0,4)} × ${fmtN(out.beta_ct_t0,4)} = ${fmtN(out.phi_tt0,4)}`);
-  L.push(`  k_σ = σ_c / f_ck(t0) = ${fmtN(inputs.sigma_c,3)} / ${fmtN(out.fck_t0,3)} = ${fmtN(out.k_sigma,4)}`);
+  L.push(`  k_σ = max(0.45, σ_c / f_ck(t0)) = max(0.45, ${fmtN(inputs.sigma_c,3)} / ${fmtN(out.fck_t0,3)} ) = ${fmtN(out.k_sigma,4)}`);
   L.push('  ε_cci(t0) = φ(t,t0) · exp(1.5·(k_σ − 0.45)) · (σ_c / E_c)');
   L.push(`           = ${fmtN(out.phi_tt0,4)} · exp(1.5·(${fmtN(out.k_sigma,4)} − 0.45)) · (${fmtN(inputs.sigma_c,3)} / ${fmtN(out.Ec,3)} GPa)`);
   L.push(`           = ${Number(out.eps_cci).toExponential(6)} (dimensionless)  ≈ ${(out.eps_cci*1e6).toFixed(1)} µε`);
@@ -340,6 +357,12 @@ function attachEvents(){
   $('btnCalc').addEventListener('click', calculateAndRender);
   $('btnReset').addEventListener('click', resetForm);
 
+  // Print
+  const btnPrint = $('btnPrint');
+  if (btnPrint) {
+    btnPrint.addEventListener('click', () => window.print());
+  }
+  
   const ids = ['fck','RH','Ac','u','t0','t','T','sigma_c','ts'];
   ids.forEach(id => {
     $(id).addEventListener('input', () => {
